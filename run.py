@@ -1032,10 +1032,13 @@ def drugeddon(u):
             print color.RED+u, " -> Not exploitable"
     except:
         pass
+try:
+	requests.urllib3.disable_warnings()
+except:
+	pass
 def check(site):
     headers = {'User-Agent': 'Mozilla 5.0'}
     try : 
-        requests.urllib3.disable_warnings()
         w = requests.get(site, verify=False, headers=headers)
         if 'wordpress' in w.content or '/wp-content/' in w.content :
             save = open('tmp/wordpress.txt', 'a')
